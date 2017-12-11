@@ -17,39 +17,6 @@ use Chrisyue\PhpM3u8\Tag\KeyTag;
 
 class DummyM3u8Factory
 {
-    public static function createM3u8($version = 3)
-    {
-        $m3u8 = new M3u8();
-        $m3u8->getVersionTag()->setVersion($version);
-        $m3u8->getMediaSequenceTag()->setMediaSequence(33);
-        $m3u8->getDiscontinuitySequenceTag()->setDiscontinuitySequence(3);
-        $m3u8->getTargetDurationTag()->setTargetDuration(12);
-        $m3u8->getEndlistTag()->setEndless(true);
-
-        $segment = new Segment($version);
-
-        $keyTag = new KeyTag();
-        $keyTag->setMethod('AES-128')->setUri('key')->setIV('0xF85A5066CCB442181ACACA2E862A34DC');
-        $segment->getKeyTags()->add($keyTag);
-        $keyTag = new KeyTag();
-        $keyTag->setMethod('SAMPLE-AES')->setUri('key2')->setIV('0xF85A5066CCB442181ACACA2E862A34DC')
-            ->setKeyFormat('com.apple')->setKeyFormatVersions([1]);
-        $segment->getKeyTags()->add($keyTag);
-
-        $segment->getExtinfTag()->setDuration(12)->setTitle('hello world');
-        $segment->getByteRangeTag()->setLength(10000)->setOffset(100);
-        $segment->getUri()->setUri('stream33.ts');
-        $m3u8->getSegments()->add($segment);
-
-        $segment = new Segment($version);
-        $segment->getExtinfTag()->setDuration(10);
-        $segment->getDiscontinuityTag()->setDiscontinuity(true);
-        $segment->getUri()->setUri('video01.ts');
-        $m3u8->getSegments()->add($segment);
-
-        return $m3u8;
-    }
-
     public static function createM3u8Content($version = 3)
     {
         if ($version < 3) {

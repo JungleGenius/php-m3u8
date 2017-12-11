@@ -8,9 +8,6 @@ namespace Chrisyue\PhpM3u8\Model\TagMetadata;
  */
 class TagMetadata
 {
-    const TYPE_ATTRIBUTE_LIST = 'attribute-list';
-    const TYPE_SIMPLE = 'simple';
-
     /**
      * @var string
      */
@@ -22,9 +19,25 @@ class TagMetadata
     public $multiple;
 
     /**
-     * @ENUM({self::TYPE_ATTRIBUTE_LIST, self::TYPE_SIMPLE})
+     * @var string
      */
     public $type;
 
+    /**
+     * @var string
+     */
     public $propertyName;
+
+    /**
+     * @var string
+     */
+    public $category;
+
+    /**
+     * for doctrine annotation registry
+     */
+    static public function getFilePath()
+    {
+        return __FILE__;
+    }
 }

@@ -2,6 +2,8 @@
 
 namespace Chrisyue\PhpM3u8\Model;
 
+use Chrisyue\PhpM3u8\Model\TagMetadata\TagMetadata as Tag;
+
 class MediaSegment
 {
     /**
@@ -12,9 +14,9 @@ class MediaSegment
     private $inf;
 
     /**
-     * @var mixed
-     * 
-     * @Tag(type="attribute-list", multiple=true)
+     * @var ArrayObject
+     *
+     * @Tag(multiple=true)
      */
     private $keys;
 
@@ -24,6 +26,11 @@ class MediaSegment
      * @Tag
      */
     private $discontinuity;
+
+    /**
+     * @var string
+     */
+    private $uri;
 
     public function __construct()
     {
@@ -51,11 +58,11 @@ class MediaSegment
     }
 
     /**
-     * @param mixed $key
+     * @param ArrayObject $key
      *
      * @return self
      */
-    public function addKey($key)
+    public function addKey(\ArrayObject $key)
     {
         $this->keys->append($key);
 
@@ -63,7 +70,7 @@ class MediaSegment
     }
 
     /**
-     * @return \ArrayObject
+     * @return ArrayObject
      */
     public function getKeys()
     {
@@ -88,5 +95,25 @@ class MediaSegment
     public function isDiscontinuity()
     {
         return $this->discontinuity;
+    }
+
+    /**
+     * @param string $uri
+     *
+     * @return self
+     */
+    public function setUri($uri)
+    {
+        $this->uri = $uri;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUri()
+    {
+        return $this->uri;
     }
 }

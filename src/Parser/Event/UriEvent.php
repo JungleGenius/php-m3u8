@@ -2,7 +2,9 @@
 
 namespace Chrisyue\PhpM3u8\Parser\Event;
 
-class UriEvent
+use Symfony\Component\EventDispatcher\Event;
+
+class UriEvent extends Event
 {
     /**
      * @var string

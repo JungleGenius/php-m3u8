@@ -2,7 +2,9 @@
 
 namespace Chrisyue\PhpM3u8\Parser\Event;
 
-class TagEvent
+use Symfony\Component\EventDispatcher\Event;
+
+class TagEvent extends Event
 {
     /**
      * @var string

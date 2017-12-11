@@ -6,6 +6,7 @@ use Chrisyue\PhpM3u8\Model\MediaPlaylist;
 use Chrisyue\PhpM3u8\Model\MasterPlaylist;
 use Chrisyue\PhpM3u8\Parser\Event\UriEvent;
 use Chrisyue\PhpM3u8\Parser\Event\TagEvent;
+use Chrisyue\PhpM3u8\Model\Util\StringUtil;
 
 class PlaylistBuilder
 {
@@ -35,30 +36,31 @@ class PlaylistBuilder
 
     public function addPlaylistTag($propertyName, $value, $isMultiple = false)
     {
-        $this->addTagToComponent($this->playlist, $propertyName, $value, $isMultiple);
+        call_user_func([$this->playlist, StringUtil::propertyToSetter($propertyName, $isMultiple)], $value);
     }
 
     public function addMediaSegmentTag($propertyName, $value, $isMultiple = false)
     {
         $this->ensurePlaylistType(MediaPlaylist::class);
-
-        $segment = end($this->playlist->getSegments());
+        $segments = $this->playlist->getSegments();
+        $segment = end($segments);
         if (!$segment || null !== $segment->getUri()) {
             $segment = $this->factory->createSegment();
+            $segments->append($segment);
         }
 
-        $this->addTagToComponent($segment, $propertyName, $value, $isMultiple);
-        $this->playlist->getSegments()->append($segment);
+        call_user_func([$segment, StringUtil::propertyToSetter($propertyName, $isMultiple)], $value);
     }
 
     public function addUri($uri)
     {
-        if ($this->playlist instanceof PlaylistCopyableInterface::class) {
+        if ($this->playlist instanceof PlaylistCopyableInterface) {
             throw new \RuntimeException('Adding URI to unknown playlist type');
         }
 
-        if ($this->playlist instanceof MediaPlaylist::class) {
-            $segment = end($this->playlist->getSegments());
+        if ($this->playlist instanceof MediaPlaylist) {
+            $segments = $this->playlist->getSegments();
+            $segment = end($segments);
             if (!$segment || null !== $segment->getUri()) {
                 throw new \RuntimeException('EXTINF must be before URI');
             }
@@ -68,7 +70,7 @@ class PlaylistBuilder
             return;
         }
 
-        $streamInf = end($this->playlist->getStreamInfs());
+        $streamInf = end($streamInfs = $this->playlist->getStreamInfs());
         if (!$streamInf || null !== $streamInf->getUri()) {
             throw new \RuntimeException('EXT-X-STREAM-INF must be before URI');
         }
@@ -76,21 +78,9 @@ class PlaylistBuilder
         $streamInf->setUri($uri);
     }
 
-    public function addStreamInfUri($uri)
-    {
-        $this->ensurePlaylistType(MasterPlaylist::class);
-
-    }
-
     public function getResult()
     {
         return $this->playlist;
-    }
-
-    private function addTagToComponent($component, $propertyName, $value, $isMultiple)
-    {
-        $method = $isMultiple ? sprintf('add%s', substr($propertyName, 0, -1)) : sprintf('set%s', $propertyName);
-        $this->playlist->$method($value);
     }
 
     private function ensurePlaylistType($type) {
@@ -106,6 +96,6 @@ class PlaylistBuilder
             return;
         }
 
-        throw new \RuntimeException();
+        throw new \RuntimeException('Different kinds of playlist tag in same m3u8 content');
     }
 }

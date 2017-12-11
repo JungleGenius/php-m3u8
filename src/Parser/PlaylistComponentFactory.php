@@ -6,28 +6,24 @@ use Chrisyue\PhpM3u8\Model\MediaSegment;
 use Chrisyue\PhpM3u8\Model\MediaPlaylist;
 use Chrisyue\PhpM3u8\Model\MasterPlaylist;
 use Chrisyue\PhpM3u8\Parser\PlaylistBuffer;
+use Chrisyue\PhpM3u8\Model\AttributeList;
+use Chrisyue\PhpM3u8\Model\MediaSegments;
 
 class PlaylistComponentFactory
 {
-    final public function createSegment()
+    public function createSegment()
     {
-        $class = $this->getMediaSegmentClass();
-
-        return new $class;
+        return new MediaSegment();
     }
 
-    final public function createMediaPlaylist()
+    public function createMediaPlaylist()
     {
-        $class = $this->getMediaPlaylistClass();
-
-        return new $class($this->createSegments());
+        return new MediaPlaylist($this->createSegments());
     }
 
-    final public function createMasterPlaylist()
+    public function createMasterPlaylist()
     {
-        $class = $this->getMasterPlaylistClass();
-
-        return new $class();
+        return new MasterPlaylist();
     }
 
     public function createPlaylistBuffer()
@@ -35,23 +31,13 @@ class PlaylistComponentFactory
         return new PlaylistBuffer();
     }
 
-    public function getMediaSegmentClass()
+    public function createAttributeList()
     {
-        return MediaSegment::class;
-    }
-
-    public function getMediaPlaylistClass()
-    {
-        return MediaPlaylist::class;
-    }
-
-    public function getMasterPlaylistClass()
-    {
-        return MasterPlaylist::class;
+        return new AttributeList();
     }
 
     protected function createSegments()
     {
-        return new \ArrayObject();
+        return new MediaSegments();
     }
 }

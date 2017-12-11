@@ -4,20 +4,24 @@ namespace Chrisyue\PhpM3u8\Parser;
 
 use Chrisyue\PhpM3u8\Model\MediaPlaylist;
 use Chrisyue\PhpM3u8\Parser\PlaylistBuilder;
+use Chrisyue\PhpM3u8\Parser\TagMetadataBag;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Chrisyue\PhpM3u8\Parser\Event\UriEvent;
+use Chrisyue\PhpM3u8\Parser\Event\TagEvent;
 
 class Parser
 {
     private $builder;
     private $dispatcher;
-    private $tagInfoReader;
+    private $tagMetadataBag;
 
     public function __construct(
         PlaylistBuilder $builder,
-        TagInfoReader $tagInfoReader,
+        TagMetadataBag $tagMetadataBag,
         EventDispatcherInterface $dispatcher
     ) {
         $this->builder = $builder;
-        $this->tagInfoReader = $tagInfoReader;
+        $this->tagMetadataBag = $tagMetadataBag;
         $this->dispatcher = $dispatcher;
 
         $this->builder->initPlaylist();
@@ -31,10 +35,10 @@ class Parser
         }
 
         if ('#' === $line[0]) {
-            return $this->handleUri($line);
+            return $this->handleTag($line);
         }
 
-        $this->handleTag($line);
+        return $this->handleUri($line);
     }
 
     public function getPlaylist()
@@ -53,25 +57,28 @@ class Parser
     private function handleTag($tag)
     {
         list($tag, $value) = array_pad(explode(':', substr($tag, 1)), 2, true);
-        $info = $this->tagInfoReader->read($tag);
+        $info = $this->tagMetadataBag->get($tag);
+        if (null === $info) {
+            return;
+        }
 
-        if ('attributeList' === $info->type) {
-            $value = $this->parseAttributelistValue($value);
+        if (\ArrayObject::class === $info->type) {
+            $value = $this->parseAttributeListValue($value);
         }
 
         $event = new TagEvent($tag, $value);
         $this->dispatcher->dispatch('tag.parsed', $event);
 
-        $builderMethod = sprintf('add%sTag', $info->belongsTo);
+        $builderMethod = sprintf('add%sTag', $info->category);
         $this->builder->$builderMethod($info->propertyName, $event->getValue(), $info->multiple);
     }
 
     private function parseAttributeListValue($value)
     {
-        $attributes = [];
+        $attributes = $this->factory->createAttributeList();
         foreach (explode(',', $value) as $attr) {
             list($key, $value) = explode('=', $attr);
-            $attributes[$key] = trim($value, '"');
+            $attributes[$key] = $value;
         }
 
         return $attributes;

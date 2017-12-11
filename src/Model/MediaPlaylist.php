@@ -3,6 +3,7 @@
 namespace Chrisyue\PhpM3u8\Model;
 
 use Chrisyue\PhpM3u8\Model\MediaSegment;
+use Chrisyue\PhpM3u8\Model\TagMetadata\TagMetadata as Tag;
 
 class MediaPlaylist extends AbstractPlaylist
 {
@@ -14,7 +15,7 @@ class MediaPlaylist extends AbstractPlaylist
     private $targetDuration;
 
     /**
-     * @var \ArrayObject
+     * @var ArrayObject
      */
     private $segments;
 
@@ -44,7 +45,7 @@ class MediaPlaylist extends AbstractPlaylist
     }
 
     /**
-     * @return \ArrayObject
+     * @return ArrayObject
      */
     public function getSegments()
     {

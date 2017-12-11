@@ -2,19 +2,21 @@
 
 namespace Chrisyue\PhpM3u8\Model;
 
+use Chrisyue\PhpM3u8\Model\TagMetadata\TagMetadata as Tag;
+
 class MasterPlaylist extends AbstractPlaylist
 {
     /**
      * @var mixed
      *
-     * @Tag(type="attribute-list")
+     * @Tag
      */
     private $sessionKey;
 
     /**
-     * @var mixed
+     * @var ArrayObject
      *
-     * @Tag(type="attribute-list", multiple=true)
+     * @Tag(multiple=true)
      */
     private $streamInfs;
 
@@ -44,11 +46,11 @@ class MasterPlaylist extends AbstractPlaylist
     }
 
     /**
-     * @param mixed $streamInf
+     * @param ArrayObject $streamInf
      *
      * @return self
      */
-    public function addStreamInf($streamInf)
+    public function addStreamInf(\ArrayObject $streamInf)
     {
         $this->streamInfs->append($streamInf);
 
@@ -56,7 +58,7 @@ class MasterPlaylist extends AbstractPlaylist
     }
 
     /**
-     * @return \ArrayObject
+     * @return ArrayObject
      */
     public function getStreamInfs()
     {
