@@ -7,14 +7,21 @@ use Chrisyue\PhpM3u8\Model\MasterPlaylist;
 use Chrisyue\PhpM3u8\Parser\Event\UriEvent;
 use Chrisyue\PhpM3u8\Parser\Event\TagEvent;
 use Chrisyue\PhpM3u8\Model\Util\StringUtil;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Chrisyue\PhpM3u8\Parser\Event\TagAddingEvent;
+use Chrisyue\PhpM3u8\Parser\Event\UriAddingEvent;
 
 class PlaylistBuilder
 {
     private $factory;
+    private $dispatcher;
 
-    public function __construct(PlaylistComponentFactory $factory)
-    {
+    public function __construct(
+        PlaylistComponentFactory $factory,
+        EventDispatcherInterface $dispatcher
+    ) {
         $this->factory = $factory;
+        $this->dispatcher = $dispatcher;
     }
 
     public function initPlaylist()
@@ -36,7 +43,7 @@ class PlaylistBuilder
 
     public function addPlaylistTag($propertyName, $value, $isMultiple = false)
     {
-        call_user_func([$this->playlist, StringUtil::propertyToSetter($propertyName, $isMultiple)], $value);
+        $this->callComponentSetter($this->playlist, $propertyName, $isMultiple, $value);
     }
 
     public function addMediaSegmentTag($propertyName, $value, $isMultiple = false)
@@ -49,7 +56,7 @@ class PlaylistBuilder
             $segments->append($segment);
         }
 
-        call_user_func([$segment, StringUtil::propertyToSetter($propertyName, $isMultiple)], $value);
+        $this->callComponentSetter($segment, $propertyName, $isMultiple, $value);
     }
 
     public function addUri($uri)
@@ -58,24 +65,17 @@ class PlaylistBuilder
             throw new \RuntimeException('Adding URI to unknown playlist type');
         }
 
-        if ($this->playlist instanceof MediaPlaylist) {
-            $segments = $this->playlist->getSegments();
-            $segment = end($segments);
-            if (!$segment || null !== $segment->getUri()) {
-                throw new \RuntimeException('EXTINF must be before URI');
-            }
-
-            $segment->setUri($uri);
-
-            return;
+        $method = $this->playlist instanceof MasterPlaylist ? 'getStreamInfs' : 'getSegments';
+        $components = $this->playlist->$method();
+        $component = end($components);
+        if (!$component || null !== $component->getUri()) {
+            throw new \RuntimeException();
         }
 
-        $streamInf = end($streamInfs = $this->playlist->getStreamInfs());
-        if (!$streamInf || null !== $streamInf->getUri()) {
-            throw new \RuntimeException('EXT-X-STREAM-INF must be before URI');
-        }
+        $event = new UriAddingEvent($uri);
+        $this->dispatcher->dispatch(UriAddingEvent::class, $event);
 
-        $streamInf->setUri($uri);
+        $component->setUri($event->getUri());
     }
 
     public function getResult()
@@ -83,19 +83,29 @@ class PlaylistBuilder
         return $this->playlist;
     }
 
+    private function callComponentSetter($component, $propertyName, $isMultiple, $value)
+    {
+        if (is_array($value)) {
+            $value = $this->factory->createAttributeList($value);
+        }
+
+        $event = new TagAddingEvent($propertyName, $value);
+        $this->dispatcher->dispatch(TagAddingEvent::class, $event);
+
+        call_user_func([$component, StringUtil::propertyToSetter($propertyName, $isMultiple)], $event->getValue());
+    }
+
     private function ensurePlaylistType($type) {
         if ($this->playlist instanceof $type) {
             return;
         }
 
-        if ($this->playlist instanceof PlaylistCopyableInterface) {
-            $playlist = $type === MediaPlaylist::class ? $this->factory->createMediaPlaylist() : $this->factory->createMasterPlaylist();
-            $this->playlist->copyToPlaylist($playlist);
-            $this->playlist = $playlist;
-
-            return;
+        if (!$this->playlist instanceof PlaylistCopyableInterface) {
+            throw new \RuntimeException('Different kinds of playlist tag in a same m3u8 content');
         }
 
-        throw new \RuntimeException('Different kinds of playlist tag in same m3u8 content');
+        $playlist = $type === MediaPlaylist::class ? $this->factory->createMediaPlaylist() : $this->factory->createMasterPlaylist();
+        $this->playlist->copyToPlaylist($playlist);
+        $this->playlist = $playlist;
     }
 }

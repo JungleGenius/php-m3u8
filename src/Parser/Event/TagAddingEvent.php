@@ -4,30 +4,30 @@ namespace Chrisyue\PhpM3u8\Parser\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
-class TagEvent extends Event
+class TagAddingEvent extends Event
 {
     /**
      * @var string
      */
-    private $tag;
+    private $property;
 
     /**
      * @var mixed
      */
     private $value;
 
-    public function __construct($tag, $value)
+    public function __construct($property, $value)
     {
-        $this->tag = $tag;
+        $this->property = $property;
         $this->value = $value;
     }
 
     /**
      * @return string
      */
-    public function getTag()
+    public function getProperty()
     {
-        return $this->tag;
+        return $this->property;
     }
 
     /**

@@ -5,24 +5,18 @@ namespace Chrisyue\PhpM3u8\Parser;
 use Chrisyue\PhpM3u8\Model\MediaPlaylist;
 use Chrisyue\PhpM3u8\Parser\PlaylistBuilder;
 use Chrisyue\PhpM3u8\Parser\TagMetadataBag;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Chrisyue\PhpM3u8\Parser\Event\UriEvent;
-use Chrisyue\PhpM3u8\Parser\Event\TagEvent;
 
 class Parser
 {
     private $builder;
-    private $dispatcher;
     private $tagMetadataBag;
 
     public function __construct(
         PlaylistBuilder $builder,
-        TagMetadataBag $tagMetadataBag,
-        EventDispatcherInterface $dispatcher
+        TagMetadataBag $tagMetadataBag
     ) {
         $this->builder = $builder;
         $this->tagMetadataBag = $tagMetadataBag;
-        $this->dispatcher = $dispatcher;
 
         $this->builder->initPlaylist();
     }
@@ -38,20 +32,12 @@ class Parser
             return $this->handleTag($line);
         }
 
-        return $this->handleUri($line);
+        $this->builder->addUri($line);
     }
 
     public function getPlaylist()
     {
         return $this->builder->getResult();
-    }
-
-    private function handleUri($uri)
-    {
-        $event = new UriEvent($uri);
-        $this->dispatcher->dispatch('uri.parsed', $event);
-
-        $this->builder->addUri($event->getUri());
     }
 
     private function handleTag($tag)
@@ -66,16 +52,13 @@ class Parser
             $value = $this->parseAttributeListValue($value);
         }
 
-        $event = new TagEvent($tag, $value);
-        $this->dispatcher->dispatch('tag.parsed', $event);
-
         $builderMethod = sprintf('add%sTag', $info->category);
-        $this->builder->$builderMethod($info->propertyName, $event->getValue(), $info->multiple);
+        $this->builder->$builderMethod($info->propertyName, $value, $info->multiple);
     }
 
     private function parseAttributeListValue($value)
     {
-        $attributes = $this->factory->createAttributeList();
+        $attributes = [];
         foreach (explode(',', $value) as $attr) {
             list($key, $value) = explode('=', $attr);
             $attributes[$key] = $value;

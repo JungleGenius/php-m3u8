@@ -18,6 +18,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Chrisyue\PhpM3u8\Parser\Parser;
 use Chrisyue\PhpM3u8\Parser\PlaylistBuilder;
 use Chrisyue\PhpM3u8\Parser\TagMetadataBag;
+use Chrisyue\PhpM3u8\Parser\Event\TagEvent;
 
 class ParserTest extends TestCase
 {
@@ -35,10 +36,9 @@ class ParserTest extends TestCase
     private function createParser()
     {
         $factory = new PlaylistComponentFactory();
-        $builder = new PlaylistBuilder($factory);
+        $builder = new PlaylistBuilder($factory, new EventDispatcher);
         $tagMetadataBag = new TagMetadataBag($factory);
-        $dispatcher = new EventDispatcher();
 
-        return new Parser($builder, $tagMetadataBag, $dispatcher);
+        return new Parser($builder, $tagMetadataBag);
     }
 }

@@ -45,7 +45,7 @@ class TagMetadataBag
                 $tagMetadata->propertyName = $property->getName();
                 $tagMetadata->category = $category;
                 if (null === $tagMetadata->name) {
-                    $tagMetadata->name = StringUtil::propertyToTag($property->getName());
+                    $tagMetadata->name = StringUtil::propertyToTag($property->getName(), $tagMetadata->multiple);
                 }
 
                 $methodName = StringUtil::propertyToSetter($property->getName(), $tagMetadata->multiple);

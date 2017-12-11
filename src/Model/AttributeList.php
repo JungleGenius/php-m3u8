@@ -8,7 +8,7 @@ class AttributeList extends \ArrayObject
 {
     public function __call($method, array $arguments)
     {
-        if (0 !== strrpos($method, 'get', -strlen($method)) {
+        if (0 !== strrpos($method, 'get', -strlen($method))) {
             throw new \BadMethodCallException();
         }
 

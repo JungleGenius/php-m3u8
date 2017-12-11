@@ -6,8 +6,12 @@ use Stringy\Stringy as S;
 
 class StringUtil
 {
-    static public function propertyToTag($property)
+    static public function propertyToTag($property, $multiple = false)
     {
+        if ($multiple) {
+            $property = substr($property, 0, -1);
+        }
+
         return sprintf('EXT-X-%s', S::create($property)->dasherize()->toUpperCase());
     }
 

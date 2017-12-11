@@ -4,6 +4,7 @@ namespace Chrisyue\PhpM3u8\Dumper;
 
 use Chrisyue\PhpM3u8\Model\AbstractPlaylist;
 use Chrisyue\PhpM3u8\Model\MediaPlaylist;
+use Chrisyue\PhpM3u8\Model\MasterPlaylist;
 
 class Dumper
 {
@@ -12,118 +13,49 @@ class Dumper
 
     public function dump(AbstractPlaylist $playlist)
     {
-        $this->lines = null;
+        $this->lines = ['#EXTM3U'],
+        $this->generateLines($playlist, AbstractPlaylist::class),
+        $this->generateLines($playlist, $playlist instanceof MediaPlaylist ? MediaPlaylist::class : MasterPlaylist::class);
 
-        $this->generateCommonTagLines($playlist);
-        if ($playlist instanceof MediaPlaylist) {
-            $this->generateMediaPlaylistLines($playlist);
-
-            return implode("\n", $this->lines);
-        }
-
-        $this->generateMasterPlaylistLines($playlist);
-
-        return implode("\n", $this->lines);
+        return explode("\n", $this->lines);
     }
 
-    private function generateCommonTagLines(AbstractPlaylist $playlist)
+    private function getTagMetadata($property)
     {
-        $this->lines = ['#EXTM3U'];
-        $refClass = new \ReflectionClass(AbstractPlaylist::class);
-        foreach ($refClass->getProperties() as $property) {
-            $metadata = $this->getMetadataFromProperty($property);
-            if (null === $metadata) {
-                continue;
-            }
-
-            $this->generateLineByMetadata($playlist, $metadata);
-        }
-    }
-
-    private function generateMediaPlaylistLines(MediaPlaylist $playlist)
-    {
-        $refClass = new \ReflectionClass($playlist);
-        foreach ($refClass->getProperties() as $property) {
-            $metadata = $this->getMetadataFromProperty($property);
-            if (null === $metadata) {
-                if ('segments' !== $property->getName()) {
-                    continue;
-                }
-
-                $this->generateMediaSegmentLines($playlist->getSegments());
-
-                continue;
-            }
-
-            $this->generateLineByMetadata($playlist, $metadata);
-        }
-    }
-
-    private function generateMasterPlaylistLines(MasterPlaylist $playlist)
-    {
-        $refClass = new \ReflectionClass($playlist);
-        foreach ($refClass->getProperties() as $property) {
-            $metadata = $this->getMetadataFromProperty($property);
-            if (null === $metadata) {
-                continue;
-            }
-
-            $this->generateLineByMetadata($playlist, $metadata);
-        }
-    }
-
-    private function generateMediaSegmentLines(\ArrayObject $segments)
-    {
-        if (0 === count($segments)) {
-            return;
-        }
-
-        $refClass = new \ReflectionClass($segments[0]);
-        foreach ($segments as $segment) {
-            foreach ($refClass->getProperties() as $property) {
-                $metadata = $this->getMetadataFromProperty($property);
-                if (null === $metadata) {
-                    continue;
-                }
-
-                $this->generateLineByMetadata($segment, $metadata);
-            }
-        }
-    }
-
-    private function getMetadataFromProperty(\ReflectionProperty $property)
-    {
-        $tag = StringUtil::propertyToTag($property->getName());
+        $tag = StringUtil::propertyToTag($property);
 
         return $tagMetadataBag->get($tag);
     }
 
-    private function generateLineByMetadata($component, TagMetadata $metadata)
+    private function generateLinesForComponent($component, $class)
     {
-        $value = call_user_func([$component, StringUtil::propertyToGetter($metadata->propertyName)]);
-        if (\ArrayObject::class === $metadata->type) {
-            $value = $this->dumpAttributeList($value);
-        }
+        $refClass = new \ReflectionClass($class);
+        foreach ($refClass->getProperties() as $refProp) {
+            $metadata = $this->getTagMetadata($refProp->getName());
+            $refProp->setAccessible(true);
+            if (!$metadata) {
+                if ('segments' === $refProp->getName()) {
+                    foreach ($refProp->getValue() as $segment) {
+                        $this->generateLinesForComponent($segment, MediaSegment::class));
+                    }
+                }
 
-        if (is_bool($value)) {
-            $this->lines[] = $tag;
-
-            return;
-        }
-
-        $this->lines[] = sprintf('%s:%s', $tag, $value);
-    }
-
-    private function dumpAttributeList(\ArrayObject $attributes)
-    {
-        $attrs = [];
-        foreach ($attributes as $key => $value) {
-            if (null === $value) {
                 continue;
             }
-            $attrs[] = sprintf('%s=%s', $key, $value);
-        }
 
-        return implode(',', $attrs);
+            $refProp->setAccessible(true);
+            $value = $refProp->getValue($component);
+
+            if (!$value) {
+                continue;
+            }
+
+            $line = $metadata->name;
+            if (!true === $value) {
+                $line = sprintf('%s:%s', $line, $value);
+            }
+
+            $this->lines[] = $line;
+        }
     }
 }

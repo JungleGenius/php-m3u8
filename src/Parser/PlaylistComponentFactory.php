@@ -31,9 +31,9 @@ class PlaylistComponentFactory
         return new PlaylistBuffer();
     }
 
-    public function createAttributeList()
+    public function createAttributeList(array $attributes)
     {
-        return new AttributeList();
+        return new AttributeList($attributes);
     }
 
     protected function createSegments()

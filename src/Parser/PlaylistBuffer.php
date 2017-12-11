@@ -8,5 +8,10 @@ class PlaylistBuffer extends AbstractPlaylist implements PlaylistCopyableInterfa
 {
     public function copyToPlaylist(AbstractPlaylist $playlist)
     {
+        $refClass = new \ReflectionClass(AbstractPlaylist::class);
+        foreach ($refClass->getProperties() as $prop) {
+            $prop->setAccessible(true);
+            $prop->setValue($playlist, $prop->getValue($this));
+        }
     }
 }

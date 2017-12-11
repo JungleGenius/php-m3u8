@@ -4,7 +4,7 @@ namespace Chrisyue\PhpM3u8\Parser\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
-class UriEvent extends Event
+class UriAddingEvent extends Event
 {
     /**
      * @var string
