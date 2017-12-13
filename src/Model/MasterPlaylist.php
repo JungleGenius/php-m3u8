@@ -7,61 +7,12 @@ use Chrisyue\PhpM3u8\Model\TagMetadata\TagMetadata as Tag;
 class MasterPlaylist extends AbstractPlaylist
 {
     /**
-     * @var mixed
-     *
-     * @Tag
+     * @Tag(type="Chrisyue\PhpM3u8\Model\Tag\SessionKey")
      */
-    private $sessionKey;
+    public $sessionKey;
 
     /**
-     * @var ArrayObject
-     *
-     * @Tag(multiple=true)
+     * @Tags(name="EXT-X-STREAMINF", type="Chrisyue\PhpM3u8\Model\Tag\StreamInf")
      */
-    private $streamInfs;
-
-    public function __construct()
-    {
-        $this->streamInfs = new \ArrayObject();
-    }
-
-    /**
-     * @param mixed $sessionKey
-     *
-     * @return self
-     */
-    public function setSessionKey($sessionKey)
-    {
-        $this->sessionKey = $sessionKey;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSessionKey()
-    {
-        return $this->sessionKey;
-    }
-
-    /**
-     * @param ArrayObject $streamInf
-     *
-     * @return self
-     */
-    public function addStreamInf(\ArrayObject $streamInf)
-    {
-        $this->streamInfs->append($streamInf);
-
-        return $this;
-    }
-
-    /**
-     * @return ArrayObject
-     */
-    public function getStreamInfs()
-    {
-        return $this->streamInfs;
-    }
+    public $streamInfs;
 }

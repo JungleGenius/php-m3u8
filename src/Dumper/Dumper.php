@@ -5,53 +5,59 @@ namespace Chrisyue\PhpM3u8\Dumper;
 use Chrisyue\PhpM3u8\Model\AbstractPlaylist;
 use Chrisyue\PhpM3u8\Model\MediaPlaylist;
 use Chrisyue\PhpM3u8\Model\MasterPlaylist;
+use Chrisyue\PhpM3u8\Parser\TagMetadataBag;
+use Chrisyue\PhpM3u8\Model\Util\StringUtil;
+use Chrisyue\PhpM3u8\Model\MediaSegment;
 
 class Dumper
 {
     private $tagMetadataBag;
     private $lines;
 
+    public function __construct(TagMetadataBag $tagMetadataBag)
+    {
+        $this->tagMetadataBag = $tagMetadataBag;
+    }
+
     public function dump(AbstractPlaylist $playlist)
     {
-        $this->lines = ['#EXTM3U'],
-        $this->generateLines($playlist, AbstractPlaylist::class),
-        $this->generateLines($playlist, $playlist instanceof MediaPlaylist ? MediaPlaylist::class : MasterPlaylist::class);
+        $this->lines = ['#EXTM3U'];
+        $this->generateComponentLines($playlist, new \ReflectionClass(AbstractPlaylist::class));
+        $this->generateComponentLines($playlist, new \ReflectionClass($playlist instanceof MediaPlaylist ? MediaPlaylist::class : MasterPlaylist::class));
 
-        return explode("\n", $this->lines);
+        return implode("\n", $this->lines);
     }
 
     private function getTagMetadata($property)
     {
         $tag = StringUtil::propertyToTag($property);
 
-        return $tagMetadataBag->get($tag);
+        return $this->tagMetadataBag->get($tag);
     }
 
-    private function generateLinesForComponent($component, $class)
+    private function generateComponentLines($component, \ReflectionClass $refClass)
     {
-        $refClass = new \ReflectionClass($class);
         foreach ($refClass->getProperties() as $refProp) {
             $metadata = $this->getTagMetadata($refProp->getName());
             $refProp->setAccessible(true);
             if (!$metadata) {
                 if ('segments' === $refProp->getName()) {
-                    foreach ($refProp->getValue() as $segment) {
-                        $this->generateLinesForComponent($segment, MediaSegment::class));
+                    $mediaSegmentReflection = new \ReflectionClass(MediaSegment::class);
+                    foreach ($refProp->getValue($component) as $segment) {
+                        $this->generateComponentLines($segment, $mediaSegmentReflection);
                     }
                 }
 
                 continue;
             }
 
-            $refProp->setAccessible(true);
             $value = $refProp->getValue($component);
-
             if (!$value) {
                 continue;
             }
 
             $line = $metadata->name;
-            if (!true === $value) {
+            if (true !== $value) {
                 $line = sprintf('%s:%s', $line, $value);
             }
 

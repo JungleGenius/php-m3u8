@@ -19,6 +19,7 @@ use Chrisyue\PhpM3u8\Parser\Parser;
 use Chrisyue\PhpM3u8\Parser\PlaylistBuilder;
 use Chrisyue\PhpM3u8\Parser\TagMetadataBag;
 use Chrisyue\PhpM3u8\Parser\Event\TagEvent;
+use Chrisyue\PhpM3u8\Dumper\Dumper;
 
 class ParserTest extends TestCase
 {
@@ -30,15 +31,21 @@ class ParserTest extends TestCase
             $parser->parseLine($line);
         }
 
-        var_dump($parser->getPlaylist()); die();
+        $playlist = $parser->getPlaylist();
+
+        echo $this->createDumper()->dump($playlist);
     }
 
     private function createParser()
     {
         $factory = new PlaylistComponentFactory();
         $builder = new PlaylistBuilder($factory, new EventDispatcher);
-        $tagMetadataBag = new TagMetadataBag($factory);
 
-        return new Parser($builder, $tagMetadataBag);
+        return new Parser($builder, new TagMetadataBag());
+    }
+
+    private function createDumper()
+    {
+        return new Dumper(new TagMetadataBag());
     }
 }

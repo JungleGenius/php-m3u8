@@ -17,7 +17,7 @@ class TagMetadataBag
     private $annotationReader;
     private $tagMetadatas = [];
 
-    public function __construct(PlaylistComponentFactory $factory)
+    public function __construct()
     {
         AnnotationRegistry::registerFile(TagMetadata::getFilePath());
         $this->annotationReader = new AnnotationReader();
