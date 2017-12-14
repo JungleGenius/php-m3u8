@@ -6,22 +6,17 @@ use Stringy\Stringy as S;
 
 class StringUtil
 {
-    static public function propertyToTag($property, $multiple = false)
+    public static function propertyToTag($property, $multiple = false)
     {
         if ($multiple) {
             $property = substr($property, 0, -1);
         }
 
-        return sprintf('EXT-X-%s', S::create($property)->dasherize()->toUpperCase());
+        return sprintf('EXT-X-%s', self::propertyToAttribute($property));
     }
 
-    static public function propertyToSetter($property, $multiple = false)
+    public static function propertyToAttribute($property)
     {
-        return $multiple ? sprintf('add%s', substr($property, 0, -1)) : sprintf('set%s', $property);
-    }
-
-    static public function propertyToGetter($property)
-    {
-        return sprintf('get%s', ucfirst($property));
+        return S::create($property)->dasherize()->toUpperCase();
     }
 }

@@ -2,24 +2,34 @@
 
 namespace Chrisyue\PhpM3u8\Model;
 
-use Chrisyue\PhpM3u8\Model\TagMetadata\TagMetadata as Tag;
+use Chrisyue\PhpM3u8\Model\Annotation\Tag;
 
 class MediaSegment
 {
     /**
      * @Tag(name="EXTINF", type="Chrisyue\PhpM3u8\Model\Tag\Inf")
      */
-    public $inf;
+    private $inf;
 
     /**
-     * @Tags(name="EXT-X-KEY", type="Chrisyue\PhpM3u8\Model\Tag\Key")
+     * @Tag(type="Chrisyue\PhpM3u8\Model\Tag\Key", multiple=true)
      */
-    public $keys;
+    private $keys;
 
     /**
      * @Tag
      */
-    public $discontinuity;
+    private $discontinuity;
+
+    /**
+     * @Tag
+     */
+    private $byterange;
 
     public $uri;
+
+    public function __construct()
+    {
+        $this->keys = new \ArrayObject();
+    }
 }

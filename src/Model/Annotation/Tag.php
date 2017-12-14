@@ -17,4 +17,9 @@ class Tag
      * @var string
      */
     public $type;
+
+    /**
+     * @var bool
+     */
+    public $multiple;
 }

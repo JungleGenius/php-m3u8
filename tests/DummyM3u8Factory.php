@@ -12,8 +12,6 @@
 namespace Chrisyue\PhpM3u8\tests;
 
 use Chrisyue\PhpM3u8\M3u8;
-use Chrisyue\PhpM3u8\Segment;
-use Chrisyue\PhpM3u8\Tag\KeyTag;
 
 class DummyM3u8Factory
 {
@@ -51,6 +49,7 @@ stream33.ts
 #EXTINF:10.000,
 #EXT-X-DISCONTINUITY
 video01.ts
+#EXT-X-ENDLIST
 M3U8;
     }
 }

@@ -6,8 +6,9 @@ class FileParser
 {
     private $parser;
 
-    public function __construct()
+    public function __construct(Parser $parser)
     {
+        $this->parser = $parser;
     }
 
     public function parse(\SplFileObject $file)

@@ -2,12 +2,9 @@
 
 namespace Chrisyue\PhpM3u8\Parser;
 
-use Chrisyue\PhpM3u8\Model\MediaSegment;
-use Chrisyue\PhpM3u8\Model\MediaPlaylist;
 use Chrisyue\PhpM3u8\Model\MasterPlaylist;
-use Chrisyue\PhpM3u8\Parser\PlaylistBuffer;
-use Chrisyue\PhpM3u8\Model\AttributeList;
-use Chrisyue\PhpM3u8\Model\MediaSegments;
+use Chrisyue\PhpM3u8\Model\MediaPlaylist;
+use Chrisyue\PhpM3u8\Model\MediaSegment;
 
 class PlaylistComponentFactory
 {
@@ -18,7 +15,7 @@ class PlaylistComponentFactory
 
     public function createMediaPlaylist()
     {
-        return new MediaPlaylist($this->createSegments());
+        return new MediaPlaylist();
     }
 
     public function createMasterPlaylist()
@@ -29,15 +26,5 @@ class PlaylistComponentFactory
     public function createPlaylistBuffer()
     {
         return new PlaylistBuffer();
-    }
-
-    public function createAttributeList(array $attributes)
-    {
-        return new AttributeList($attributes);
-    }
-
-    protected function createSegments()
-    {
-        return new MediaSegments();
     }
 }

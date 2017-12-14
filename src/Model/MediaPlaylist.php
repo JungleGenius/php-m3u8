@@ -2,15 +2,34 @@
 
 namespace Chrisyue\PhpM3u8\Model;
 
-use Chrisyue\PhpM3u8\Model\MediaSegment;
-use Chrisyue\PhpM3u8\Model\TagMetadata\TagMetadata as Tag;
+use Chrisyue\PhpM3u8\Model\Annotation\Tag;
 
 class MediaPlaylist extends AbstractPlaylist
 {
     /**
      * @Tag
      */
-    public $targetDuration;
+    private $targetduration;
+
+    /**
+     * @Tag
+     */
+    private $mediaSequence;
+
+    /**
+     * @Tag
+     */
+    private $discontinuitySequence;
 
     public $segments;
+
+    /**
+     * @Tag
+     */
+    private $endlist;
+
+    public function __construct()
+    {
+        $this->segments = new \ArrayObject();
+    }
 }

@@ -11,15 +11,11 @@
 
 namespace Chrisyue\PhpM3u8\tests;
 
-use Chrisyue\PhpM3u8\M3u8;
-use PHPUnit\Framework\TestCase;
-use Chrisyue\PhpM3u8\Parser\PlaylistComponentFactory;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Chrisyue\PhpM3u8\Dumper\Dumper;
 use Chrisyue\PhpM3u8\Parser\Parser;
 use Chrisyue\PhpM3u8\Parser\PlaylistBuilder;
-use Chrisyue\PhpM3u8\Parser\TagMetadataBag;
-use Chrisyue\PhpM3u8\Parser\Event\TagEvent;
-use Chrisyue\PhpM3u8\Dumper\Dumper;
+use Chrisyue\PhpM3u8\Parser\PlaylistComponentFactory;
+use PHPUnit\Framework\TestCase;
 
 class ParserTest extends TestCase
 {
@@ -39,13 +35,13 @@ class ParserTest extends TestCase
     private function createParser()
     {
         $factory = new PlaylistComponentFactory();
-        $builder = new PlaylistBuilder($factory, new EventDispatcher);
+        $builder = new PlaylistBuilder($factory);
 
-        return new Parser($builder, new TagMetadataBag());
+        return new Parser($builder);
     }
 
     private function createDumper()
     {
-        return new Dumper(new TagMetadataBag());
+        return new Dumper();
     }
 }

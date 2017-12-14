@@ -2,26 +2,17 @@
 
 namespace Chrisyue\PhpM3u8\Parser;
 
-use Chrisyue\PhpM3u8\Model\MediaPlaylist;
+use Chrisyue\PhpM3u8\Model\Mapping\TagMetadata;
 use Chrisyue\PhpM3u8\Model\MasterPlaylist;
-use Chrisyue\PhpM3u8\Parser\Event\UriEvent;
-use Chrisyue\PhpM3u8\Parser\Event\TagEvent;
-use Chrisyue\PhpM3u8\Model\Util\StringUtil;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Chrisyue\PhpM3u8\Parser\Event\TagAddingEvent;
-use Chrisyue\PhpM3u8\Parser\Event\UriAddingEvent;
+use Chrisyue\PhpM3u8\Model\MediaPlaylist;
 
 class PlaylistBuilder
 {
     private $factory;
-    private $dispatcher;
 
-    public function __construct(
-        PlaylistComponentFactory $factory,
-        EventDispatcherInterface $dispatcher
-    ) {
+    public function __construct(PlaylistComponentFactory $factory)
+    {
         $this->factory = $factory;
-        $this->dispatcher = $dispatcher;
     }
 
     public function initPlaylist()
@@ -29,34 +20,23 @@ class PlaylistBuilder
         $this->playlist = $this->factory->createPlaylistBuffer();
     }
 
-    public function addMasterPlaylistTag($propertyName, $value, $isMultiple = false)
+    public function addPlaylistTag(TagMetadata $metadata, $value)
     {
-        $this->ensurePlaylistType(MasterPlaylist::class);
-        $this->addPlaylistTag($propertyName, $value, $isMultiple);
+        $this->ensurePlaylistType($metadata->getProperty()->getDeclaringClass()->getName());
+        $this->callComponentSetter($this->playlist, $metadata, $value);
     }
 
-    public function addMediaPlaylistTag($propertyName, $value, $isMultiple = false)
+    public function addMediaSegmentTag(TagMetadata $metadata, $value)
     {
         $this->ensurePlaylistType(MediaPlaylist::class);
-        $this->addPlaylistTag($propertyName, $value, $isMultiple);
-    }
 
-    public function addPlaylistTag($propertyName, $value, $isMultiple = false)
-    {
-        $this->callComponentSetter($this->playlist, $propertyName, $isMultiple, $value);
-    }
-
-    public function addMediaSegmentTag($propertyName, $value, $isMultiple = false)
-    {
-        $this->ensurePlaylistType(MediaPlaylist::class);
-        $segments = $this->playlist->getSegments();
-        $segment = end($segments);
-        if (!$segment || null !== $segment->getUri()) {
+        $segment = end($this->playlist->segments);
+        if (!$segment || null !== $segment->uri) {
             $segment = $this->factory->createSegment();
-            $segments->append($segment);
+            $this->playlist->segments->append($segment);
         }
 
-        $this->callComponentSetter($segment, $propertyName, $isMultiple, $value);
+        $this->callComponentSetter($segment, $metadata, $value);
     }
 
     public function addUri($uri)
@@ -65,17 +45,13 @@ class PlaylistBuilder
             throw new \RuntimeException('Adding URI to unknown playlist type');
         }
 
-        $method = $this->playlist instanceof MasterPlaylist ? 'getStreamInfs' : 'getSegments';
-        $components = $this->playlist->$method();
-        $component = end($components);
-        if (!$component || null !== $component->getUri()) {
+        $property = $this->playlist instanceof MasterPlaylist ? 'streamInfs' : 'segments';
+        $component = end($this->playlist->$property);
+        if (!$component || null !== $component->uri) {
             throw new \RuntimeException();
         }
 
-        $event = new UriAddingEvent($uri);
-        $this->dispatcher->dispatch(UriAddingEvent::class, $event);
-
-        $component->setUri($event->getUri());
+        $component->uri = $uri;
     }
 
     public function getResult()
@@ -83,19 +59,19 @@ class PlaylistBuilder
         return $this->playlist;
     }
 
-    private function callComponentSetter($component, $propertyName, $isMultiple, $value)
+    private function callComponentSetter($component, TagMetadata $metadata, $value)
     {
-        if (is_array($value)) {
-            $value = $this->factory->createAttributeList($value);
+        $property = $metadata->getProperty();
+        $property->setAccessible(true);
+        if ($metadata->isMultiple()) {
+            return $property->getValue($component)->append($value);
         }
 
-        $event = new TagAddingEvent($propertyName, $value);
-        $this->dispatcher->dispatch(TagAddingEvent::class, $event);
-
-        call_user_func([$component, StringUtil::propertyToSetter($propertyName, $isMultiple)], $event->getValue());
+        $property->setValue($component, $value);
     }
 
-    private function ensurePlaylistType($type) {
+    private function ensurePlaylistType($type)
+    {
         if ($this->playlist instanceof $type) {
             return;
         }
