@@ -72,11 +72,11 @@ class Dumper
     {
         $line = $metadata->getName();
         if (true === $value) {
-            return $line;
+            return sprintf('#%s', $line);
         }
 
         if (!$value instanceof AbstractAttributeList) {
-            return sprintf('%s:%s', $line, $value);
+            return sprintf('#%s:%s', $line, $value);
         }
 
         $attrMetadatas = new AttributeMetadatas($metadata->getType());
@@ -94,6 +94,6 @@ class Dumper
             $attrs[] = sprintf('%s=%s', $name, $val);
         }
 
-        return implode(',', $attrs);
+        return sprintf('#%s:%s', $line, implode(',', $attrs));
     }
 }

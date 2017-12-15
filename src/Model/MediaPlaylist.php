@@ -6,6 +6,8 @@ use Chrisyue\PhpM3u8\Model\Annotation\Tag;
 
 class MediaPlaylist extends AbstractPlaylist
 {
+    use AutoGetterSetterTrait;
+
     /**
      * @Tag
      */
@@ -31,5 +33,15 @@ class MediaPlaylist extends AbstractPlaylist
     public function __construct()
     {
         $this->segments = new \ArrayObject();
+    }
+
+    public function getDuration()
+    {
+        $duration = 0;
+        foreach ($this->segments as $segment) {
+            $duration += $segment->getInf()->getDuration();
+        }
+
+        return $duration;
     }
 }

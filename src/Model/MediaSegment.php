@@ -6,10 +6,7 @@ use Chrisyue\PhpM3u8\Model\Annotation\Tag;
 
 class MediaSegment
 {
-    /**
-     * @Tag(name="EXTINF", type="Chrisyue\PhpM3u8\Model\Tag\Inf")
-     */
-    private $inf;
+    use AutoGetterSetterTrait;
 
     /**
      * @Tag(type="Chrisyue\PhpM3u8\Model\Tag\Key", multiple=true)
@@ -17,12 +14,17 @@ class MediaSegment
     private $keys;
 
     /**
-     * @Tag
+     * @Tag(name="EXTINF", type="Chrisyue\PhpM3u8\Model\Tag\Inf")
      */
-    private $discontinuity;
+    private $inf;
 
     /**
      * @Tag
+     */
+    private $discontinuity = false;
+
+    /**
+     * @Tag(type="Chrisyue\PhpM3u8\Model\Tag\Byterange")
      */
     private $byterange;
 

@@ -3,12 +3,12 @@
 namespace Chrisyue\PhpM3u8\Model;
 
 use Chrisyue\PhpM3u8\Model\Annotation\Tag;
+use Stringy\Stringy as S;
+use Chrisyue\PhpM3u8\Model\Context;
 
 abstract class AbstractPlaylist
 {
     /**
-     * @var int
-     *
      * @Tag
      */
     private $version;
@@ -21,6 +21,7 @@ abstract class AbstractPlaylist
     public function setVersion($version)
     {
         $this->version = $version;
+        Context::$params['version'] = $version;
 
         return $this;
     }

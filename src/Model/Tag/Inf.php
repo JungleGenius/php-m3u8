@@ -2,26 +2,36 @@
 
 namespace Chrisyue\PhpM3u8\Model\Tag;
 
-class Inf
+use Chrisyue\PhpM3u8\Model\Context;
+
+class Inf implements FormattedTagInterface
 {
     /**
      * @var int|float
      */
-    private $setDuration;
+    private $duration;
 
     /**
      * @var string
      */
     private $title;
 
+    static public function fromString($string)
+    {
+        $self = new self();
+        list($self->duration, $self->title) = explode(',', $string);
+
+        return $self;
+    }
+
     /**
-     * @param int|float $setDuration
+     * @param int|float $duration
      *
      * @return self
      */
-    public function setSetDuration($setDuration)
+    public function setDuration($duration)
     {
-        $this->setDuration = $setDuration;
+        $this->duration = $duration;
 
         return $this;
     }
@@ -29,9 +39,9 @@ class Inf
     /**
      * @return int|float
      */
-    public function getSetDuration()
+    public function getDuration()
     {
-        return $this->setDuration;
+        return $this->duration;
     }
 
     /**
@@ -52,5 +62,17 @@ class Inf
     public function getTitle()
     {
         return $this->title;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        if (Context::$params['version'] > 2) {
+            return sprintf('%.3f,%s', $this->duration, $this->title);
+        }
+
+        return sprintf('%d,%s', $this->duration, $this->title);
     }
 }

@@ -6,6 +6,8 @@ use Chrisyue\PhpM3u8\Model\Annotation\Tag;
 
 class MasterPlaylist extends AbstractPlaylist
 {
+    use AutoGetterSetterTrait;
+
     /**
      * @Tag(type="Chrisyue\PhpM3u8\Model\Tag\SessionKey")
      */
