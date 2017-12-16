@@ -21,7 +21,7 @@ class ParserTest extends TestCase
 {
     public function testRead()
     {
-        $content = DummyM3u8Factory::createM3u8Content(2);
+        $content = DummyM3u8Factory::createMediaPlaylistContent(2);
 
         $parser = new Parser(new PlaylistBuilder(new PlaylistComponentFactory()));
         foreach (explode("\n", $content) as $line) {
@@ -51,15 +51,37 @@ class ParserTest extends TestCase
         $this->assertTrue($segment->isDiscontinuity());
 
         $this->assertEquals(22, $playlist->getDuration());
+
+        $content = DummyM3u8Factory::createMasterPlaylistContent();
+        $parser = new Parser(new PlaylistBuilder(new PlaylistComponentFactory()));
+        foreach (explode("\n", $content) as $line) {
+            $parser->parseLine($line);
+        }
+
+        $playlist = $parser->getPlaylist();
+        $this->assertEquals(true, $playlist->isIndependentSegments());
+        $this->assertEquals(1.1, $playlist->getStart()->getTimeOffset());
+        $this->assertEquals('YES', $playlist->getStart()->getPrecise());
+        $this->assertEquals('AUDIO', $playlist->getMedias()[0]->getType());
+        $this->assertEquals('media.uri', $playlist->getMedias()[0]->getUri());
+        $this->assertEquals('group', $playlist->getMedias()[0]->getGroupId());
+        $this->assertEquals('zh-Hans', $playlist->getMedias()[0]->getLanguage());
+        $this->assertEquals('zh-Hans', $playlist->getMedias()[0]->getAssocLanguage());
+        $this->assertEquals('name', $playlist->getMedias()[0]->getName());
+        $this->assertEquals('YES', $playlist->getMedias()[0]->getDefault());
+        $this->assertEquals('YES', $playlist->getMedias()[0]->getAutoselect());
+        $this->assertEquals('NO', $playlist->getMedias()[0]->getForced());
+        $this->assertEquals('CC1', $playlist->getMedias()[0]->getInstreamId());
+        $this->assertEquals('public.easy-to-read', $playlist->getMedias()[0]->getCharacteristics());
+        $this->assertEquals('6', $playlist->getMedias()[0]->getChannels());
     }
 
     public function testDump()
     {
-        $playlist = DummyM3u8Factory::createM3u8(3);
-        // var_dump($playlist); die();
+        $playlist = DummyM3u8Factory::createMediaPlaylist(3);
         $dumper = new Dumper();
 
-        $this->assertEquals(DummyM3u8Factory::createM3u8Content(3), $dumper->dump($playlist));
+        $this->assertEquals(DummyM3u8Factory::createMediaPlaylistContent(3), $dumper->dump($playlist));
     }
 }
 

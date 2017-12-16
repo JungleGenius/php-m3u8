@@ -17,7 +17,7 @@ use Chrisyue\PhpM3u8\Model\Tag;
 
 class DummyM3u8Factory
 {
-    public static function createM3u8($version = 3)
+    public static function createMediaPlaylist($version = 3)
     {
         $playlist = new MediaPlaylist();
         $playlist->setVersion($version)
@@ -61,7 +61,7 @@ class DummyM3u8Factory
         return $playlist;
     }
 
-    public static function createM3u8Content($version = 3)
+    public static function createMediaPlaylistContent($version = 3)
     {
         if ($version < 3) {
             return <<<'M3U8'
@@ -95,6 +95,17 @@ stream33.ts
 #EXTINF:10.000,
 #EXT-X-DISCONTINUITY
 video01.ts
+M3U8;
+    }
+
+    public static function createMasterPlaylistContent()
+    {
+        return <<<'M3U8'
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-INDEPENDENT-SEGMENTS
+#EXT-X-START:TIME-OFFSET=1.1,PRECISE=YES
+#EXT-X-MEDIA:TYPE=AUDIO,URI="media.uri",GROUP-ID="group",LANGUAGE="zh-Hans",ASSOC-LANGUAGE="zh-Hans",NAME="name",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,INSTREAM-ID="CC1",CHARACTERISTICS="public.easy-to-read",CHANNELS="6"
 M3U8;
     }
 }

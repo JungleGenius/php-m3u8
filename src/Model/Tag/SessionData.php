@@ -4,12 +4,17 @@ namespace Chrisyue\PhpM3u8\Model\Tag;
 
 use Chrisyue\PhpM3u8\Model\Annotation\Attribute;
 
-class Key extends AbstractAttributeList
+class SessionData extends AbstractAttributeList
 {
     /**
-     * @Attribute(type="enum")
+     * @Attribute(type="string")
      */
-    public $method;
+    public $dataId;
+
+    /**
+     * @Attribute(type="string")
+     */
+    public $values;
 
     /**
      * @Attribute(type="string")
@@ -17,17 +22,7 @@ class Key extends AbstractAttributeList
     public $uri;
 
     /**
-     * @Attribute(type="hex")
-     */
-    public $iv;
-
-    /**
      * @Attribute(type="string")
      */
-    public $keyformat;
-
-    /**
-     * @Attribute(type="string")
-     */
-    public $keyformatversions;
+    public $language;
 }
