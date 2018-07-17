@@ -91,8 +91,8 @@ class StreamTags implements DumpableInterface, \Iterator, \ArrayAccess
             $tag = new Tag\StreamTag();
             $tag->readLines($lines);
 
-            //if (null === $tag->getBandwidth()) {
-            if (null === $tag->getProgramId()) {
+            //if (null === $tag->getProgramId()) {
+            if (null === $tag->getBandwidth()) {
                 return;
             }
 
