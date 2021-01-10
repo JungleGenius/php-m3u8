@@ -15,7 +15,9 @@ class Segment extends AbstractContainer
 {
     private $extinfTag;
     private $byteRangeTag;
+    private $cueoutTag;
     private $discontinuityTag;
+    private $cueinTag;
     private $streamTags;
     private $keyTags;
     private $uri;
@@ -27,7 +29,9 @@ class Segment extends AbstractContainer
     {
         $this->extinfTag = new Tag\ExtinfTag($m3u8Version);
         $this->byteRangeTag = new Tag\ByteRangeTag();
+        $this->cueoutTag = new Tag\CueOutTag();
         $this->discontinuityTag = new Tag\DiscontinuityTag();
+        $this->cueinTag = new Tag\CueInTag();
         $this->streamTags = new StreamTags();
         $this->keyTags = new KeyTags();
         $this->uri = new Uri();
@@ -73,6 +77,32 @@ class Segment extends AbstractContainer
     public function isDiscontinuity()
     {
         return $this->discontinuityTag->isDiscontinuity();
+    }
+
+    /**
+     * @return Chrisyue\PhpM3u8\Tag\CueOutTag
+     */
+    public function getCueOutTag()
+    {
+        return $this->cueoutTag;
+    }
+
+    public function isCueOut()
+    {
+        return $this->cueoutTag->isCueOut();
+    }
+
+    /**
+     * @return Chrisyue\PhpM3u8\Tag\CueInTag
+     */
+    public function getCueInTag()
+    {
+        return $this->cueinTag;
+    }
+
+    public function isCueIn()
+    {
+        return $this->cueinTag->isCueIn();
     }
 
     /**
@@ -127,7 +157,9 @@ class Segment extends AbstractContainer
             $this->keyTags,
             $this->extinfTag,
             $this->byteRangeTag,
+            $this->cueoutTag,
             $this->discontinuityTag,
+            $this->cueinTag,
             $this->uri,
         ];
     }

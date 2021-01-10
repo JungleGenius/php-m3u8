@@ -81,6 +81,8 @@ According to [HLS draft version 23](https://tools.ietf.org/html/draft-pantos-htt
     - [ ] EXT-X-MAP
     - [ ] EXT-X-PROGRAM-DATE-TIME
     - [ ] EXT-X-DATERANGE
+    - [x] EXT-X-CUE-OUT
+    - [x] EXT-X-CUE-IN
 * Media Playlist Tags
     - [x] EXT-X-TARGETDURATION
     - [x] EXT-X-MEDIA-SEQUENCE
